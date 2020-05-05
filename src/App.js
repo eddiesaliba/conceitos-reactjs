@@ -1,23 +1,45 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import api from './services/api';
 
 import "./styles.css";
 
 function App() {
+  const [repositories, setRepositories] = useState([]);
+
+  /* O hook "useEffect" será chamado toda vez que houver mudanças na variável 
+     "repositories".  */
+  useEffect(() => {
+    api.get('repositories').then(response => {
+      setRepositories(response.data);
+    })
+  },[repositories]);
+
   async function handleAddRepository() {
-    // TODO
+    const response = await api.post('repositories', {
+      title: `Novo repositório ${Date.now()}`,
+      url: 'www.abc.com.br',
+      techs: ' diversas'
+    });
+
+    const repository = response.data;
+
+    setRepositories([...repositories,repository]);
   }
 
   async function handleRemoveRepository(id) {
-    // TODO
+    await api.delete(`repositories/${id}`);
+
+    //setRepositories([...repositories]);
   }
 
   return (
     <div>
       <ul data-testid="repository-list">
         <li>
-          Repositório 1
-
-          <button onClick={() => handleRemoveRepository(1)}>
+          <ul>
+            { repositories.map(repository => <li key={repository.id}>repository.title</li>) }
+          </ul>
+          <button onClick={() => handleRemoveRepository(repository.id)}>
             Remover
           </button>
         </li>
